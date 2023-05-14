@@ -1,20 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AiOutlineLike, AiFillLike } from "react-icons/ai";
 
-const Image = ({ src, alt, name,description,category,id }) => {
+const Image = ({ src, alt, name, description, category, id }) => {
   const [like, setLike] = useState(false);
   const [count, setCount] = useState(0);
-  
 
   const handleLikes = () => {
     if (!like) {
       setLike(true);
       setCount(count + 1);
+      localStorage.setItem(`like-${id}`, "true");
+      localStorage.setItem(`count-${id}`, (count + 1).toString());
     } else {
       setLike(false);
       setCount(count - 1);
+      localStorage.setItem(`like-${id}`, "false");
+      localStorage.setItem(`count-${id}`, (count - 1).toString());
     }
   };
+
+  useEffect(() => {
+    const storedLike = localStorage.getItem(`like-${id}`);
+    const storedCount = localStorage.getItem(`count-${id}`);
+    if (storedLike === "true") {
+      setLike(true);
+    }
+    if (storedCount) {
+      setCount(parseInt(storedCount));
+    }
+  }, [id]);
 
   return (
     <div className="relative flex flex-col mb-7">
@@ -43,8 +57,8 @@ const Image = ({ src, alt, name,description,category,id }) => {
             </div>
           </div>
         </div>
-          </div>
-          </div>
+      </div>
+    </div>
   );
 };
 
@@ -56,7 +70,10 @@ const Gallery = ({ images }) => {
   };
 
   const filteredImages = images.filter((image) => {
-    return image.name.toLowerCase().includes(searchTerm.toLowerCase())|| image.category.toLowerCase().includes(searchTerm.toLowerCase());
+    return (
+      image.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      image.category.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   });
   return (
     <div className="max-w-7xl mx-auto my-8">
@@ -76,9 +93,10 @@ const Gallery = ({ images }) => {
               key={index}
               src={image.src}
               alt={image.alt}
-                  name={image.name}
-                  description={image.description}
-                  category={image.category}
+              id={index} // Use index as the ID
+              name={image.name}
+              description={image.description}
+              category={image.category}
             />
           ))
         ) : (
